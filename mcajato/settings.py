@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Meus apps
     "clientes",
+    "servicos",
+    # Terceiros
 ]
 
 MIDDLEWARE = [
