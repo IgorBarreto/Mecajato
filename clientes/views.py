@@ -3,6 +3,9 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.core import serializers
+from django.urls import reverse
+from django.shortcuts import redirect
+from django.views.decorators.csrf import csrf_exempt
 from .models import Cliente, Carro
 
 # Create your views here.
@@ -73,4 +76,50 @@ def att_cliente(request: HttpRequest):
     clietes_json = json.loads(serializers.serialize("json", cliente))[0][
         "fields"
     ]
-    return JsonResponse(clietes_json)
+    carros = Carro.objects.filter(cliente=cliente[0])
+    carros_json = json.loads(serializers.serialize("json", carros))
+    carros_json = [
+        {"fields": carro["fields"], "id": carro["pk"]} for carro in carros_json
+    ]
+    cliente_id = json.loads(serializers.serialize("json", cliente))[0]["pk"]
+    data = {
+        "cliente": clietes_json,
+        "carros": carros_json,
+        "client_id": cliente_id,
+    }
+    return JsonResponse(data)
+
+
+@csrf_exempt
+def update_carro(request: HttpRequest, id):
+    nome_carro = request.POST.get("carro")
+    placa_carro = request.POST.get("placa")
+    ano_carro = request.POST.get("ano")
+    carro = Carro.objects.get(id=id)
+    lista_carros = Carro.objects.filter(placa=placa_carro).exclude(id=id)
+    if lista_carros.exists():
+        HttpResponse("Placa já existente")
+
+    carro.carro = nome_carro
+    carro.placa = placa_carro
+    carro.ano = ano_carro
+    carro.save()
+    return HttpResponse("Daados alterados com sucesso")
+
+
+def excluir_carro(request: HttpRequest, id):
+    try:
+        carro = Carro.objects.get(id=id)
+        carro.delete()
+        return redirect(
+            reverse("clientes" + f"?aba=att_cliente&id_cliente={id}")
+        )
+    except:
+        # TODO: EXIBIR MENSAGEM DE ERRO
+        return redirect(reverse("clientes"))
+
+
+def update_cliente(request: HttpRequest, id):
+    body = json.load(request.body)
+    print(body)
+    return JsonResponse({"teste": "teste"})
