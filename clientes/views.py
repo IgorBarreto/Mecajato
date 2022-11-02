@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.core import serializers
 from django.urls import reverse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from .models import Cliente, Carro
 
@@ -120,6 +120,28 @@ def excluir_carro(request: HttpRequest, id):
 
 
 def update_cliente(request: HttpRequest, id):
-    body = json.load(request.body)
-    print(body)
-    return JsonResponse({"teste": "teste"})
+    body = json.loads(request.body)
+
+    nome = body["nome"]
+    sobrenome = body["sobrenome"]
+    email = body["email"]
+    cpf = body["cpf"]
+
+    cliente = get_object_or_404(Cliente, id=id)
+    try:
+        cliente.nome = nome
+        cliente.sobrenome = sobrenome
+        cliente.email = email
+        cliente.cpf = cpf
+        cliente.save()
+        return JsonResponse(
+            {
+                "status": "200",
+                "nome": nome,
+                "sobrenome": sobrenome,
+                "email": email,
+                "cpf": cpf,
+            }
+        )
+    except:
+        return JsonResponse({"status": "500"})
