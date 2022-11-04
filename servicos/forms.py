@@ -30,4 +30,6 @@ class FormServico(ModelForm):
             choices = list()
             for i, j in self.fields["categoria_manutencao"].choices:
                 categoria = CategoriaManutencao.objects.get(titulo=j)
-                print(categoria.get_titulo_display())
+                choices.append((i.value, categoria.get_titulo_display()))
+
+            self.field["categoria_manutencao"].choices = choices

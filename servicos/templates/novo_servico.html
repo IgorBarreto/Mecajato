@@ -9,6 +9,9 @@
 <br>
 <br>
 <div class="container">
-    {{form.as_p}}
+    <form action="{% {% url 'novo_servico' %}%}" method='POST'>{% csrf_token %}
+        {{form.as_p}}
+        <input type='submit' class='btn btn-success' value='Salvar'>
+    </form>
 </div>
 {% endblock %}
